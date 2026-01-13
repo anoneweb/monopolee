@@ -3,131 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Undangan Pernikahan</title>
-    
+    <title>Game Bisnis Sederhana</title>
     <style>
-        body {
-            font-family: 'Georgia', serif;
-            background-color: #f9f7f2;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            color: #4a4a4a;
-        }
-        .container {
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; background-color: #f0f8ff; }
+        h1 { color: #2c3e50; }
+        
+        /* Area Papan Utama */
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
             max-width: 600px;
-            margin: 50px auto;
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin: 20px auto;
         }
-        h1 { color: #d4a373; font-size: 2.5em; }
-        .names { font-size: 1.5em; margin: 20px 0; font-weight: bold; }
-        .details { margin: 30px 0; line-height: 1.6; }
-        .guest-box {
-            margin-top: 30px;
+
+        .tile {
+            border: 2px solid #333;
             padding: 15px;
-            background: #faedcd;
+            background: white;
             border-radius: 8px;
-            border: 1px dashed #d4a373;
+            position: relative;
+            min-height: 80px;
+            font-size: 14px;
         }
-        #loading { font-style: italic; color: #888; }
-        .hidden { display: none; }
+
+        .tile.player-here { border-color: #e74c3c; background-color: #fadbd8; }
+        .owned { background-color: #d5f5e3; }
+
+        /* Panel Kontrol */
+        #controls {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fff;
+            border-top: 2px solid #ccc;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover { background-color: #2980b9; }
+        
+        #log {
+            margin-top: 15px;
+            color: #555;
+            font-style: italic;
+            height: 30px;
+        }
+
+        #stats { font-weight: bold; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="loading">Memuat undangan...</div>
-
-    <div class="container hidden" id="content">
-        <p>The Wedding of</p>
-        <h1 id="coupleNames">... & ...</h1>
-        
-        <div class="details">
-            <p><strong>Tanggal:</strong> <span id="eventDate">...</span></p>
-            <p><strong>Lokasi:</strong> <span id="eventLocation">...</span></p>
-        </div>
-
-        <div class="guest-box">
-            <p>Kepada Yth. Bapak/Ibu/Saudara/i:</p>
-            <h2 id="guestName">Tamu Undangan</h2>
-            <p>Di Tempat</p>
-        </div>
-
-        <p style="margin-top: 40px; font-size: 0.9em;">
-            Tanpa mengurangi rasa hormat, kami mengundang Anda untuk hadir.
-        </p>
+    <h1>🏰 Game Bisnis Mini</h1>
+    
+    <div id="stats">
+        Uang: <span id="money">Rp 1000</span> | Posisi: <span id="position">Start</span>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    <div id="game-board">
+        </div>
 
-        // --- KONFIGURASI FIREBASE ANDA DI SINI ---
-        // Copy dari Firebase Console -> Project Settings -> General -> Your Apps -> SDK setup and configuration (pilih CDN)
-        const firebaseConfig = {
-            apiKey: "AIzaSyDxxxxxxxxx...", // GANTI INI
-            authDomain: "project-id.firebaseapp.com", // GANTI INI
-            projectId: "project-id", // GANTI INI
-            storageBucket: "project-id.appspot.com",
-            messagingSenderId: "123456...",
-            appId: "1:123456..."
-        };
+    <div id="controls">
+        <div id="log">Klik kocok dadu untuk mulai!</div>
+        <button onclick="playTurn()">🎲 Kocok Dadu</button>
+    </div>
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+<script>
+    // --- KONFIGURASI GAME ---
+    const boardData = [
+        { name: "Start", type: "start", price: 0 },
+        { name: "Tanah A", type: "property", price: 100, rent: 20, owner: null },
+        { name: "Tanah B", type: "property", price: 150, rent: 30, owner: null },
+        { name: "Pajak", type: "tax", price: 50 },
+        { name: "Tanah C", type: "property", price: 200, rent: 40, owner: null },
+        { name: "Penjara", type: "jail", price: 0 },
+        { name: "Tanah D", type: "property", price: 250, rent: 50, owner: null },
+        { name: "Parkir", type: "parking", price: 0 },
+        { name: "Tanah E", type: "property", price: 300, rent: 60, owner: null },
+        { name: "Kesempatan", type: "chance", price: 0 },
+        { name: "Tanah F", type: "property", price: 350, rent: 70, owner: null },
+        { name: "Tanah G", type: "property", price: 400, rent: 80, owner: null }
+    ];
 
-        // Fungsi untuk mengambil parameter dari URL
-        function getQueryParam(param) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
+    let player = {
+        money: 1000,
+        position: 0 // Index array boardData
+    };
+
+    const boardEl = document.getElementById("game-board");
+    const logEl = document.getElementById("log");
+    const moneyEl = document.getElementById("money");
+    const posEl = document.getElementById("position");
+
+    // --- INISIALISASI PAPAN ---
+    function renderBoard() {
+        boardEl.innerHTML = '';
+        boardData.forEach((tile, index) => {
+            const div = document.createElement("div");
+            div.className = "tile";
+            if (index === player.position) div.classList.add("player-here");
+            if (tile.owner === 'player') div.classList.add("owned");
+
+            let content = `<strong>${tile.name}</strong><br>`;
+            if (tile.type === 'property') {
+                content += `H: ${tile.price} | S: ${tile.rent}`;
+                if (tile.owner === 'player') content += `<br>✅ Milikmu`;
+            }
+            
+            div.innerHTML = content;
+            boardEl.appendChild(div);
+        });
+        
+        moneyEl.innerText = "Rp " + player.money;
+        posEl.innerText = boardData[player.position].name;
+    }
+
+    // --- LOGIKA PERMAINAN ---
+    function playTurn() {
+        // 1. Kocok Dadu
+        const dice = Math.floor(Math.random() * 4) + 1; // Dadu kecil 1-4 agar game tidak terlalu cepat
+        logEl.innerText = `Kamu melempar angka ${dice}...`;
+
+        // 2. Pindah Posisi
+        player.position = (player.position + dice) % boardData.length;
+        
+        // Cek jika melewati start (tambah uang)
+        if (player.position < dice && player.position !== 0) { 
+            player.money += 100;
+            logEl.innerText += " Lewat Start (+100)!";
         }
 
-        async function loadInvitation() {
-            // 1. Ambil ID Event dari URL (misal: ?id=klien-001)
-            const eventId = getQueryParam('id'); 
-            // 2. Ambil Nama Tamu dari URL (misal: &to=Budi)
-            const guestName = getQueryParam('to');
+        renderBoard(); // Update visual posisi
+        
+        // 3. Cek Kotak Saat Ini
+        setTimeout(() => checkTile(), 500);
+    }
 
-            if (!eventId) {
-                document.getElementById('loading').innerText = "Event ID tidak ditemukan.";
-                return;
-            }
+    function checkTile() {
+        const tile = boardData[player.position];
 
-            try {
-                // 3. Baca data dari Firebase
-                const docRef = doc(db, "events", eventId);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-
-                    // 4. Masukkan data ke HTML
-                    document.getElementById('coupleNames').innerText = `${data.groom} & ${data.bride}`;
-                    document.getElementById('eventDate').innerText = data.date;
-                    document.getElementById('eventLocation').innerText = data.location;
-                    
-                    // Set nama tamu (jika ada di URL, kalau tidak pakai default)
-                    if (guestName) {
-                        document.getElementById('guestName').innerText = guestName;
+        if (tile.type === 'property') {
+            if (tile.owner === null) {
+                // Tawarkan beli
+                if (player.money >= tile.price) {
+                    let buy = confirm(`Kamu mendarat di ${tile.name}.\nHarga: ${tile.price}.\nUangmu: ${player.money}.\nMau beli?`);
+                    if (buy) {
+                        player.money -= tile.price;
+                        tile.owner = 'player';
+                        logEl.innerText = `Kamu membeli ${tile.name}!`;
+                    } else {
+                        logEl.innerText = `Kamu tidak membeli ${tile.name}.`;
                     }
-
-                    // Tampilkan konten, sembunyikan loading
-                    document.getElementById('loading').classList.add('hidden');
-                    document.getElementById('content').classList.remove('hidden');
                 } else {
-                    document.getElementById('loading').innerText = "Data undangan tidak ditemukan!";
+                    logEl.innerText = `Uang tidak cukup untuk membeli ${tile.name}.`;
                 }
-            } catch (error) {
-                console.error("Error:", error);
-                document.getElementById('loading').innerText = "Gagal memuat data.";
+            } else if (tile.owner === 'player') {
+                logEl.innerText = "Ini properti milikmu, santai saja.";
             }
+        } 
+        else if (tile.type === 'tax') {
+            player.money -= tile.price;
+            logEl.innerText = `Kena Pajak! Bayar ${tile.price}.`;
+        }
+        else if (tile.type === 'jail') {
+            logEl.innerText = "Hanya berkunjung ke Penjara.";
+        }
+        else if (tile.type === 'chance') {
+            const luck = Math.random() > 0.5 ? 50 : -50;
+            player.money += luck;
+            logEl.innerText = luck > 0 ? "Dapat hadiah Rp 50!" : "Dompetmu jatuh! Hilang Rp 50.";
         }
 
-        // Jalankan fungsi saat halaman dimuat
-        loadInvitation();
-    </script>
+        // Cek Game Over
+        if (player.money < 0) {
+            alert("Kamu Bangkrut! Game Over.");
+            location.reload();
+        }
+
+        renderBoard();
+    }
+
+    // Mulai render pertama
+    renderBoard();
+
+</script>
 </body>
 </html>
