@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Undangan Pernikahan</title>
+    
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #f9f7f2;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            color: #4a4a4a;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        h1 { color: #d4a373; font-size: 2.5em; }
+        .names { font-size: 1.5em; margin: 20px 0; font-weight: bold; }
+        .details { margin: 30px 0; line-height: 1.6; }
+        .guest-box {
+            margin-top: 30px;
+            padding: 15px;
+            background: #faedcd;
+            border-radius: 8px;
+            border: 1px dashed #d4a373;
+        }
+        #loading { font-style: italic; color: #888; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="loading">Memuat undangan...</div>
+
+    <div class="container hidden" id="content">
+        <p>The Wedding of</p>
+        <h1 id="coupleNames">... & ...</h1>
+        
+        <div class="details">
+            <p><strong>Tanggal:</strong> <span id="eventDate">...</span></p>
+            <p><strong>Lokasi:</strong> <span id="eventLocation">...</span></p>
+        </div>
+
+        <div class="guest-box">
+            <p>Kepada Yth. Bapak/Ibu/Saudara/i:</p>
+            <h2 id="guestName">Tamu Undangan</h2>
+            <p>Di Tempat</p>
+        </div>
+
+        <p style="margin-top: 40px; font-size: 0.9em;">
+            Tanpa mengurangi rasa hormat, kami mengundang Anda untuk hadir.
+        </p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // --- KONFIGURASI FIREBASE ANDA DI SINI ---
+        // Copy dari Firebase Console -> Project Settings -> General -> Your Apps -> SDK setup and configuration (pilih CDN)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxxxxxxxxx...", // GANTI INI
+            authDomain: "project-id.firebaseapp.com", // GANTI INI
+            projectId: "project-id", // GANTI INI
+            storageBucket: "project-id.appspot.com",
+            messagingSenderId: "123456...",
+            appId: "1:123456..."
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Fungsi untuk mengambil parameter dari URL
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        async function loadInvitation() {
+            // 1. Ambil ID Event dari URL (misal: ?id=klien-001)
+            const eventId = getQueryParam('id'); 
+            // 2. Ambil Nama Tamu dari URL (misal: &to=Budi)
+            const guestName = getQueryParam('to');
+
+            if (!eventId) {
+                document.getElementById('loading').innerText = "Event ID tidak ditemukan.";
+                return;
+            }
+
+            try {
+                // 3. Baca data dari Firebase
+                const docRef = doc(db, "events", eventId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+
+                    // 4. Masukkan data ke HTML
+                    document.getElementById('coupleNames').innerText = `${data.groom} & ${data.bride}`;
+                    document.getElementById('eventDate').innerText = data.date;
+                    document.getElementById('eventLocation').innerText = data.location;
+                    
+                    // Set nama tamu (jika ada di URL, kalau tidak pakai default)
+                    if (guestName) {
+                        document.getElementById('guestName').innerText = guestName;
+                    }
+
+                    // Tampilkan konten, sembunyikan loading
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('content').classList.remove('hidden');
+                } else {
+                    document.getElementById('loading').innerText = "Data undangan tidak ditemukan!";
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById('loading').innerText = "Gagal memuat data.";
+            }
+        }
+
+        // Jalankan fungsi saat halaman dimuat
+        loadInvitation();
+    </script>
+</body>
+</html>
