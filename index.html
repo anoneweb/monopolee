@@ -3,143 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Monopoli vs Bot</title>
+    <title>Monopoli Tycoon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; text-align: center; background-color: #f4f4f4; color: #333; }
-        h1 { margin-bottom: 10px; }
-        
-        /* Area Status Pemain */
+        :root {
+            --primary: #4361ee;
+            --secondary: #f72585;
+            --success: #4cc9f0;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2b2d42;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text);
+            padding: 20px;
+        }
+
+        h1 {
+            color: #fff;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        /* --- SCOREBOARD --- */
         #scoreboard {
             display: flex;
-            justify-content: center;
             gap: 20px;
+            width: 100%;
+            max-width: 600px;
             margin-bottom: 20px;
         }
-        .player-card {
-            padding: 10px 20px;
-            border-radius: 8px;
-            background: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            width: 150px;
-        }
-        .p1-card { border-bottom: 5px solid #3498db; } /* Biru untuk Kamu */
-        .cpu-card { border-bottom: 5px solid #e74c3c; } /* Merah untuk Bot */
 
-        /* Papan Permainan */
+        .player-card {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .p1-active { border: 3px solid var(--primary); transform: scale(1.05); }
+        .cpu-active { border: 3px solid var(--secondary); transform: scale(1.05); }
+
+        .money-badge {
+            background: #2ecc71;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 5px;
+            box-shadow: 0 4px 6px rgba(46, 204, 113, 0.3);
+        }
+
+        /* --- GAME BOARD --- */
         #game-board {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
+            gap: 12px;
+            width: 100%;
             max-width: 600px;
-            margin: 0 auto;
+            perspective: 1000px;
         }
 
         .tile {
-            background: white;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 10px;
-            min-height: 90px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            min-height: 100px;
+            padding: 8px;
             position: relative;
-            font-size: 13px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            border-bottom: 4px solid #ddd;
+            transition: all 0.3s ease;
+            font-size: 12px;
         }
 
-        /* Marker Pemain di Papan */
-        .markers {
+        .tile-header { font-weight: 800; font-size: 13px; margin-bottom: 4px; }
+        .tile-price { color: #888; font-size: 11px; }
+
+        /* Ownership Styles */
+        .owned-p1 { background-color: #e3f2fd; border-bottom-color: var(--primary); }
+        .owned-cpu { background-color: #fce4ec; border-bottom-color: var(--secondary); }
+
+        /* Markers */
+        .marker-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 4px;
             position: absolute;
             top: 5px;
             right: 5px;
+        }
+        .token {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             display: flex;
-            gap: 5px;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
         }
-        .dot { width: 12px; height: 12px; border-radius: 50%; display: none; }
-        .dot.p1 { background-color: #3498db; display: block; border: 1px solid #fff; }
-        .dot.cpu { background-color: #e74c3c; display: block; border: 1px solid #fff; }
+        .token.p1 { background: var(--primary); color: white; }
+        .token.cpu { background: var(--secondary); color: white; }
 
-        /* Warna Pemilik Tanah */
-        .owned-p1 { background-color: #d6eaf8; border-color: #3498db; }
-        .owned-cpu { background-color: #fadbd8; border-color: #e74c3c; }
-
-        /* Panel Kontrol */
+        /* --- CONTROLS --- */
         #controls {
-            margin-top: 25px;
-            padding: 15px;
-            background: white;
+            margin-top: 30px;
+            text-align: center;
+            width: 100%;
             max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            border-radius: 8px;
         }
 
-        button {
-            padding: 12px 25px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #27ae60;
+        #log-box {
+            background: rgba(0,0,0,0.6);
             color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            min-height: 24px;
+            font-size: 14px;
+        }
+
+        .btn-main {
+            background: linear-gradient(45deg, #4361ee, #3f37c9);
             border: none;
-            border-radius: 5px;
+            padding: 15px 40px;
+            color: white;
+            border-radius: 50px;
+            font-size: 18px;
             font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.4);
+            transition: transform 0.2s, filter 0.2s;
         }
-        button:disabled { background-color: #95a5a6; cursor: not-allowed; }
-        
-        #log {
-            margin-top: 10px;
-            font-style: italic;
-            height: 40px;
-            color: #555;
+        .btn-main:active { transform: scale(0.95); }
+        .btn-main:disabled { filter: grayscale(1); cursor: not-allowed; }
+
+        /* --- CUSTOM MODAL (Pengganti Alert) --- */
+        #modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
         }
+        .modal-box {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 300px;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
+        .modal-btn-group { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        .btn-modal { padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white;}
+        .btn-yes { background: #2ecc71; }
+        .btn-no { background: #e74c3c; }
+        .btn-ok { background: var(--primary); }
+
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <h1>🏰 Monopoli: Kamu vs Bot</h1>
+    <h1>🏙️ MONOPOLI TYCOON</h1>
 
     <div id="scoreboard">
-        <div class="player-card p1-card">
-            <strong>👤 KAMU (Biru)</strong><br>
-            <span id="p1-money">Rp 1000</span>
+        <div id="card-p1" class="player-card p1-active">
+            <div>👤 KAMU</div>
+            <div class="money-badge" id="p1-money">Rp 1000</div>
         </div>
-        <div class="player-card cpu-card">
-            <strong>🤖 BOT (Merah)</strong><br>
-            <span id="cpu-money">Rp 1000</span>
+        <div id="card-cpu" class="player-card">
+            <div>🤖 BOT</div>
+            <div class="money-badge" id="cpu-money">Rp 1000</div>
         </div>
     </div>
 
     <div id="game-board"></div>
 
     <div id="controls">
-        <div id="log">Klik tombol untuk mulai main!</div>
-        <br>
-        <button id="btn-roll" onclick="humanTurn()">🎲 Kocok Dadu</button>
+        <div id="log-box">Selamat datang! Giliranmu mulai.</div>
+        <button id="btn-roll" class="btn-main" onclick="humanTurn()">🎲 KOCOK DADU</button>
+    </div>
+
+    <div id="modal-overlay">
+        <div class="modal-box">
+            <div id="modal-content" class="modal-title">Pesan Game</div>
+            <div id="modal-actions" class="modal-btn-group"></div>
+        </div>
     </div>
 
 <script>
-    // --- DATA & SETUP ---
+    // --- SETUP DATA ---
     const boardData = [
-        { name: "START", type: "start", price: 0 },
-        { name: "Jkt Pusat", type: "property", price: 100, rent: 20, owner: null },
-        { name: "Jkt Selatan", type: "property", price: 120, rent: 25, owner: null },
-        { name: "PAJAK", type: "tax", price: 50 },
-        { name: "Bekasi", type: "property", price: 150, rent: 30, owner: null },
-        { name: "PENJARA", type: "jail", price: 0 },
-        { name: "Depok", type: "property", price: 180, rent: 35, owner: null },
-        { name: "PARKIR", type: "parking", price: 0 },
-        { name: "Tangerang", type: "property", price: 200, rent: 40, owner: null },
-        { name: "DANA UMUM", type: "chance", price: 0 },
-        { name: "Bogor", type: "property", price: 220, rent: 45, owner: null },
-        { name: "Bandung", type: "property", price: 250, rent: 50, owner: null }
+        { name: "START", type: "start", price: 0, icon: "🏁" },
+        { name: "Jaksel", type: "property", price: 100, rent: 20, owner: null, icon: "☕" },
+        { name: "Jakpus", type: "property", price: 120, rent: 25, owner: null, icon: "🏢" },
+        { name: "PAJAK", type: "tax", price: 50, icon: "💸" },
+        { name: "Bekasi", type: "property", price: 150, rent: 30, owner: null, icon: "🏭" },
+        { name: "PENJARA", type: "jail", price: 0, icon: "🔒" },
+        { name: "Depok", type: "property", price: 180, rent: 35, owner: null, icon: "🏘️" },
+        { name: "PARKIR", type: "parking", price: 0, icon: "🅿️" },
+        { name: "Tangerang", type: "property", price: 200, rent: 40, owner: null, icon: "✈️" },
+        { name: "CHANCE", type: "chance", price: 0, icon: "❓" },
+        { name: "Bogor", type: "property", price: 220, rent: 45, owner: null, icon: "🌧️" },
+        { name: "Bandung", type: "property", price: 250, rent: 50, owner: null, icon: "🌋" }
     ];
 
     let p1 = { name: "Kamu", money: 1000, position: 0, id: 'p1' };
     let cpu = { name: "Bot", money: 1000, position: 0, id: 'cpu' };
-    
     let isGameActive = true;
 
-    // --- RENDER FUNCTION ---
+    // --- UI FUNCTIONS ---
     function renderBoard() {
         const boardEl = document.getElementById("game-board");
         boardEl.innerHTML = '';
@@ -147,113 +242,134 @@
         boardData.forEach((tile, index) => {
             const div = document.createElement("div");
             div.className = "tile";
-            
-            // Warna background jika dimiliki
             if (tile.owner === 'p1') div.classList.add("owned-p1");
             if (tile.owner === 'cpu') div.classList.add("owned-cpu");
 
-            // Marker Posisi Pemain
-            let markersHtml = '<div class="markers">';
-            if (p1.position === index) markersHtml += '<div class="dot p1"></div>';
-            if (cpu.position === index) markersHtml += '<div class="dot cpu"></div>';
-            markersHtml += '</div>';
+            // Marker Logic
+            let markers = '<div class="marker-container">';
+            if (p1.position === index) markers += '<div class="token p1">P1</div>';
+            if (cpu.position === index) markers += '<div class="token cpu">AI</div>';
+            markers += '</div>';
 
-            // Konten Teks
-            let content = `<b>${tile.name}</b>`;
+            // Tile Content
+            let info = "";
             if (tile.type === 'property') {
-                content += `<br><small>H: ${tile.price} | S: ${tile.rent}</small>`;
-                if (tile.owner === 'p1') content += `<br><small>✅ Milikmu</small>`;
-                if (tile.owner === 'cpu') content += `<br><small>⛔ Milik Bot</small>`;
-            } else if (tile.type === 'tax') {
-                content += `<br><small>Bayar: ${tile.price}</small>`;
-            }
+                info = `<div class="tile-price">💵 ${tile.price}</div>`;
+                if(tile.owner === 'p1') info += `<div style="color:var(--primary); font-weight:bold;">Milikmu</div>`;
+                if(tile.owner === 'cpu') info += `<div style="color:var(--secondary); font-weight:bold;">Milik Bot</div>`;
+            } else if (tile.type === 'tax') info = `<div class="tile-price">Bayar ${tile.price}</div>`;
 
-            div.innerHTML = markersHtml + content;
+            div.innerHTML = `
+                ${markers}
+                <div style="font-size:24px; text-align:center;">${tile.icon}</div>
+                <div class="tile-header">${tile.name}</div>
+                ${info}
+            `;
             boardEl.appendChild(div);
         });
 
-        // Update UI Uang
-        document.getElementById("p1-money").innerText = "Rp " + p1.money;
-        document.getElementById("cpu-money").innerText = "Rp " + cpu.money;
+        // Update Stats
+        document.getElementById("p1-money").innerText = `Rp ${p1.money}`;
+        document.getElementById("cpu-money").innerText = `Rp ${cpu.money}`;
     }
 
     function updateLog(msg) {
-        document.getElementById("log").innerText = msg;
+        document.getElementById("log-box").innerText = msg;
     }
 
-    // --- CORE GAMEPLAY ---
+    function setActivePlayer(player) {
+        document.getElementById("card-p1").className = player === 'p1' ? "player-card p1-active" : "player-card";
+        document.getElementById("card-cpu").className = player === 'cpu' ? "player-card cpu-active" : "player-card";
+    }
+
+    // --- MODAL SYSTEM (Custom Alerts) ---
+    function showModal(text, type, callback) {
+        const overlay = document.getElementById("modal-overlay");
+        const content = document.getElementById("modal-content");
+        const actions = document.getElementById("modal-actions");
+        
+        content.innerHTML = text;
+        actions.innerHTML = "";
+        overlay.style.display = "flex";
+
+        if (type === 'confirm') {
+            const btnYes = document.createElement("button");
+            btnYes.className = "btn-modal btn-yes";
+            btnYes.innerText = "BELI";
+            btnYes.onclick = () => { overlay.style.display = "none"; callback(true); };
+
+            const btnNo = document.createElement("button");
+            btnNo.className = "btn-modal btn-no";
+            btnNo.innerText = "LEWATI";
+            btnNo.onclick = () => { overlay.style.display = "none"; callback(false); };
+
+            actions.append(btnYes, btnNo);
+        } else {
+            const btnOk = document.createElement("button");
+            btnOk.className = "btn-modal btn-ok";
+            btnOk.innerText = "OK";
+            btnOk.onclick = () => { 
+                overlay.style.display = "none"; 
+                if(callback) callback();
+            };
+            actions.append(btnOk);
+        }
+    }
+
+    // --- GAME LOGIC ---
     function movePlayer(playerObj, steps) {
         playerObj.position = (playerObj.position + steps) % boardData.length;
-        
-        // Lewat start dapat uang
         if (playerObj.position < steps && playerObj.position !== 0) {
             playerObj.money += 100;
-            updateLog(`${playerObj.name} lewat Start (+100)!`);
+            updateLog("🎉 Lewat Start! Bonus +100");
         }
         renderBoard();
     }
 
     function checkTile(playerObj) {
         if (!isGameActive) return;
-
         const tile = boardData[playerObj.position];
         const isHuman = playerObj.id === 'p1';
         const opponent = isHuman ? cpu : p1;
 
-        // 1. Logika Properti
         if (tile.type === 'property') {
-            // A. Tanah Kosong
             if (tile.owner === null) {
                 if (playerObj.money >= tile.price) {
                     if (isHuman) {
-                        // Human: Tanya dulu
-                        setTimeout(() => {
-                            let buy = confirm(`Tanah Kosong: ${tile.name}\nHarga: ${tile.price}\nBeli?`);
-                            if (buy) {
-                                buyProperty(playerObj, tile);
-                                passTurnToCpu();
-                            } else {
-                                updateLog("Kamu tidak membeli tanah.");
-                                passTurnToCpu();
-                            }
-                        }, 200);
-                        return; // Stop disini menunggu confirm
+                        showModal(`
+                            <h3>${tile.icon} ${tile.name}</h3>
+                            <p>Harga: Rp ${tile.price}</p>
+                            <p>Sewa: Rp ${tile.rent}</p>
+                            <p>Uangmu: Rp ${playerObj.money}</p>
+                        `, 'confirm', (buy) => {
+                            if(buy) buyProperty(playerObj, tile);
+                            passTurnToCpu();
+                        });
+                        return; 
                     } else {
-                        // Bot: Selalu beli jika uang cukup
-                        buyProperty(playerObj, tile);
+                        buyProperty(playerObj, tile); // Bot auto-buy
                     }
-                } else {
-                    updateLog(`${playerObj.name} tidak cukup uang beli tanah.`);
                 }
-            } 
-            // B. Tanah Lawan (Bayar Sewa)
-            else if (tile.owner !== playerObj.id) {
+            } else if (tile.owner !== playerObj.id) {
                 playerObj.money -= tile.rent;
                 opponent.money += tile.rent;
-                updateLog(`Ouch! ${playerObj.name} bayar sewa ${tile.rent} ke ${opponent.name}.`);
+                updateLog(`💸 Bayar sewa ${tile.rent} ke ${opponent.name}`);
             }
         } 
-        
-        // 2. Logika Pajak
         else if (tile.type === 'tax') {
             playerObj.money -= tile.price;
-            updateLog(`${playerObj.name} kena pajak ${tile.price}.`);
+            updateLog("🧾 Bayar Pajak Bangunan!");
         }
-        
-        // 3. Logika Chance
         else if (tile.type === 'chance') {
             const luck = Math.random() > 0.5 ? 50 : -50;
             playerObj.money += luck;
-            updateLog(`${playerObj.name} dapat Dana Umum: ${luck}`);
+            updateLog(luck > 0 ? "🍀 Dapat Rejeki Nomplok +50" : "📉 Dompet Jatuh -50");
         }
 
         renderBoard();
         checkGameOver();
 
-        // Jika Human, turn selesai setelah checkTile (kecuali beli tanah yg async)
-        if (isHuman && tile.owner !== null) {
-            passTurnToCpu();
-        }
+        if (isHuman && tile.owner !== null) passTurnToCpu();
     }
 
     function buyProperty(playerObj, tile) {
@@ -265,60 +381,59 @@
 
     function checkGameOver() {
         if (p1.money < 0) {
-            alert("Kamu Bangkrut! Bot Menang 🤖");
+            showModal("💀 Kamu Bangkrut! Bot Menang.", 'alert', () => location.reload());
             isGameActive = false;
-            location.reload();
         } else if (cpu.money < 0) {
-            alert("Bot Bangkrut! KAMU MENANG 🎉");
+            showModal("🏆 SELAMAT! Kamu Mengalahkan Bot!", 'alert', () => location.reload());
             isGameActive = false;
-            location.reload();
         }
     }
 
-    // --- TURN MANAGEMENT ---
+    // --- TURNS ---
     function humanTurn() {
         if (!isGameActive) return;
         const btn = document.getElementById("btn-roll");
-        btn.disabled = true; // Matikan tombol agar tidak spam
-
-        const dice = Math.floor(Math.random() * 4) + 1;
-        updateLog(`Kamu melempar angka ${dice}...`);
+        btn.disabled = true;
+        setActivePlayer('p1');
         
-        movePlayer(p1, dice);
-        
-        // Cek tile (tunggu animasi render sebentar)
-        setTimeout(() => checkTile(p1), 500);
+        let dice = 0;
+        let rollCount = 0;
+        const rollAnim = setInterval(() => {
+            btn.innerText = "🎲 " + (Math.floor(Math.random()*4)+1);
+            rollCount++;
+            if(rollCount > 10) {
+                clearInterval(rollAnim);
+                dice = Math.floor(Math.random() * 4) + 1;
+                btn.innerText = "Jalan: " + dice;
+                movePlayer(p1, dice);
+                setTimeout(() => checkTile(p1), 600);
+            }
+        }, 50);
     }
 
     function passTurnToCpu() {
         if (!isGameActive) return;
-        updateLog("Giliran Bot berpikir...");
+        setActivePlayer('cpu');
+        updateLog("🤖 Bot sedang berpikir...");
         
-        // Delay 1.5 detik agar terasa "mikir"
         setTimeout(() => {
-            cpuTurn();
+            const dice = Math.floor(Math.random() * 4) + 1;
+            updateLog(`🤖 Bot melempar angka ${dice}`);
+            movePlayer(cpu, dice);
+            checkTile(cpu);
+            
+            setTimeout(() => {
+                if(isGameActive) {
+                    setActivePlayer('p1');
+                    updateLog("👉 Giliranmu!");
+                    document.getElementById("btn-roll").innerText = "🎲 KOCOK DADU";
+                    document.getElementById("btn-roll").disabled = false;
+                }
+            }, 1000);
         }, 1500);
     }
 
-    function cpuTurn() {
-        const dice = Math.floor(Math.random() * 4) + 1;
-        updateLog(`Bot melempar angka ${dice}...`);
-        
-        movePlayer(cpu, dice);
-        checkTile(cpu); // Bot otomatis handle logic
-
-        // Kembalikan giliran ke player
-        setTimeout(() => {
-            if (isGameActive) {
-                updateLog("Giliranmu! Silakan kocok dadu.");
-                document.getElementById("btn-roll").disabled = false;
-            }
-        }, 1000);
-    }
-
-    // Start
-    renderBoard();
-
+    renderBoard(); // Init
 </script>
 </body>
 </html>
