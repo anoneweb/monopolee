@@ -3,119 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report Template Generator</title>
+    <title>Report Template Generator - Telkomsel Theme</title>
     <style>
+        /* Menggunakan font modern bawaan sistem */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f5f7;
+            color: #333333;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
+
+        /* Header dengan warna identitas Telkomsel */
+        header {
+            background-color: #EC2028;
+            color: #ffffff;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(236, 32, 40, 0.3);
+            margin-bottom: 30px;
+        }
+        
+        header h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        header p {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Container utama bergaya Card modern */
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             background: #ffffff;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            margin-bottom: 40px;
         }
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #2c3e50;
-        }
+
+        /* Layout Grid */
         .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 25px;
         }
+
         @media (max-width: 768px) {
             .grid { grid-template-columns: 1fr; }
+            .container { padding: 20px; margin: 15px; }
         }
+
+        /* Form Group */
         .form-group {
             display: flex;
             flex-direction: column;
         }
-        label {
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: #4a5568;
+
+        .label-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
         }
+
+        label {
+            font-weight: 700;
+            color: #1a1a1a;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Indikator bulat merah ala Telkomsel */
+        label::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #EC2028;
+            border-radius: 50%;
+        }
+
+        /* Textarea Styling */
         textarea {
             width: 100%;
-            height: 400px;
-            padding: 12px;
-            border: 1px solid #cbd5e0;
-            border-radius: 6px;
+            height: 420px;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
             resize: vertical;
             box-sizing: border-box;
-            font-family: "Courier New", Courier, monospace;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
             font-size: 14px;
-            line-height: 1.5;
+            line-height: 1.6;
+            background-color: #fafafa;
+            transition: all 0.3s ease;
         }
+
         textarea:focus {
             outline: none;
-            border-color: #3182ce;
-            box-shadow: 0 0 0 1px #3182ce;
+            border-color: #EC2028;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(236, 32, 40, 0.15);
         }
+
+        textarea[readonly] {
+            background-color: #f8f9fa;
+            border-color: #e9ecef;
+        }
+
+        /* Button Group & Styling */
         .btn-group {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             margin-top: 15px;
-            justify-content: center;
         }
+
         button {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
             font-size: 14px;
-            color: white;
-            transition: opacity 0.2s;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        button:hover { opacity: 0.9; }
-        .btn-generate { background-color: #3182ce; }
-        .btn-clear { background-color: #e53e3e; }
-        .btn-copy { background-color: #38a169; width: 100%; margin-top: 15px;}
+
+        /* Tombol Utama (Generate) - Merah Telkomsel */
+        .btn-generate { 
+            background-color: #EC2028; 
+            color: white; 
+            flex: 2;
+            box-shadow: 0 4px 6px rgba(236, 32, 40, 0.2);
+        }
+        .btn-generate:hover { 
+            background-color: #c91820; 
+            transform: translateY(-1px);
+        }
+
+        /* Tombol Hapus - Abu-abu bersih */
+        .btn-clear { 
+            background-color: #f1f3f5; 
+            color: #495057; 
+            flex: 1;
+        }
+        .btn-clear:hover { 
+            background-color: #e9ecef; 
+            color: #212529;
+        }
+
+        /* Tombol Copy - Outline Merah elegan */
+        .btn-copy { 
+            background-color: transparent; 
+            color: #EC2028;
+            border: 2px solid #EC2028;
+            width: 100%; 
+            margin-top: 15px;
+        }
+        .btn-copy:hover { 
+            background-color: #EC2028;
+            color: white;
+        }
+        
+        /* State saat tombol copy berhasil diklik */
+        .btn-copy.success {
+            background-color: #2b8a3e;
+            border-color: #2b8a3e;
+            color: white;
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <header>
         <h2>Report Template Generator</h2>
-        
+        <p>Transformasi Data Format Laporan Internal</p>
+    </header>
+
+    <div class="container">
         <div class="grid">
             <!-- Kolom Input (Format A) -->
             <div class="form-group">
-                <label for="inputA">Format A (Input)</label>
-                <textarea id="inputA" placeholder="Paste data Format A di sini..."></textarea>
+                <div class="label-header">
+                    <label for="inputA">Format A (Sumber Data)</label>
+                </div>
+                <textarea id="inputA" placeholder="Tempel (paste) data Format A di sini..."></textarea>
                 <div class="btn-group">
-                    <button class="btn-generate" onclick="generateReport()">Generate ➔</button>
-                    <button class="btn-clear" onclick="clearFields()">Clear</button>
+                    <button class="btn-generate" onclick="generateReport()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                        Generate Data
+                    </button>
+                    <button class="btn-clear" onclick="clearFields()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                        Bersihkan
+                    </button>
                 </div>
             </div>
 
             <!-- Kolom Output (Format B) -->
             <div class="form-group">
-                <label for="outputB">Format B (Output)</label>
-                <textarea id="outputB" readonly placeholder="Hasil Format B akan muncul di sini..."></textarea>
-                <button class="btn-copy" onclick="copyOutput()">📋 Copy Hasil</button>
+                <div class="label-header">
+                    <label for="outputB">Format B (Hasil Transformasi)</label>
+                </div>
+                <textarea id="outputB" readonly placeholder="Hasil transformasi akan muncul di sini..."></textarea>
+                <button class="btn-copy" id="btnCopy" onclick="copyOutput()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Salin Hasil Format B
+                </button>
             </div>
         </div>
     </div>
 
     <script>
+        // Logika Javascript SAMA PERSIS dengan sebelumnya
         function generateReport() {
             const input = document.getElementById('inputA').value;
             const lines = input.split('\n');
 
-            // Variabel penampung data
             let pabx = '', noIh = '', tiket = '';
             let nama = '', cp = '', detailCase = '', lapulGaul = '', capt = '';
 
-            // Ekstrak Baris 1: PABX / NoIH / Case / HVC / #CXDanantara
             if (lines.length > 0 && lines[0].includes('/')) {
                 const parts = lines[0].split('/');
                 if (parts.length >= 3) {
@@ -123,7 +242,6 @@
                     noIh = parts[1].trim();
                     
                     const casePart = parts[2].trim();
-                    // Regex khusus untuk menangkap tiket dengan format 1-XXXXXXX
                     const ticketMatch = casePart.match(/1-[a-zA-Z0-9]+/);
                     if (ticketMatch) {
                         tiket = ticketMatch[0];
@@ -131,9 +249,7 @@
                 }
             }
 
-            // Loop sisa baris untuk mengambil data spesifik
             lines.forEach(line => {
-                // Menggunakan substring & indexOf agar tidak error jika ada tanda ':' ganda pada link http
                 if (line.startsWith('Nama Pelanggan :')) {
                     nama = line.substring(line.indexOf(':') + 1).trim();
                 } else if (line.startsWith('CP :')) {
@@ -147,7 +263,6 @@
                 }
             });
 
-            // Mapping ke Format B
             const output = `No Tiket : ${tiket}
 No Indihome : ${noIh}
 Nama Pelanggan : ${nama}
@@ -183,6 +298,7 @@ Note :
             document.getElementById('inputA').focus();
         }
 
+        // Sedikit penyesuaian visual untuk tombol copy agar sesuai tema
         function copyOutput() {
             const outputText = document.getElementById('outputB');
             if (!outputText.value) {
@@ -190,14 +306,19 @@ Note :
                 return;
             }
             outputText.select();
-            outputText.setSelectionRange(0, 99999); // Untuk perangkat mobile
+            outputText.setSelectionRange(0, 99999);
             
             navigator.clipboard.writeText(outputText.value).then(() => {
-                const btnCopy = document.querySelector('.btn-copy');
-                const originalText = btnCopy.innerHTML;
-                btnCopy.innerHTML = "✅ Berhasil Disalin!";
+                const btnCopy = document.getElementById('btnCopy');
+                const originalHTML = btnCopy.innerHTML;
+                
+                // Ubah tampilan jadi hijau sukses
+                btnCopy.classList.add('success');
+                btnCopy.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Berhasil Disalin!`;
+                
                 setTimeout(() => {
-                    btnCopy.innerHTML = originalText;
+                    btnCopy.classList.remove('success');
+                    btnCopy.innerHTML = originalHTML;
                 }, 2000);
             }).catch(err => {
                 alert("Gagal menyalin teks.");
