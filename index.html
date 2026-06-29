@@ -3,525 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monopoli Agresif</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Report Template Generator</title>
     <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #e63946; /* Merah lebih garang */
-            --bg: #2b2d42;
-            --board-bg: #edf2f4;
-            --gold: #f1c40f;
-        }
-
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
             margin: 0;
             padding: 20px;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: auto;
         }
-
-        /* --- LAYOUT PAPAN KOTAK (GRID) --- */
-        #game-container {
-            position: relative;
-            background: var(--board-bg);
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        .grid {
             display: grid;
-            grid-template-columns: repeat(12, 90px); 
-            grid-template-rows: repeat(11, 90px);
-            gap: 4px;
-            width: fit-content;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
-
-        .tile {
-            background: white;
-            border: 1px solid #ccc;
-            font-size: 10px;
-            position: relative;
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+        .form-group {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            padding: 5px;
-            text-align: center;
-            overflow: hidden;
-            transition: background 0.3s;
         }
-
-        .tile-header { font-weight: 800; font-size: 10px; line-height: 1.2; height: 35px; display: flex; align-items: center; justify-content: center; background: #eee; margin: -5px -5px 5px -5px; }
-        
-        /* Region Colors */
-        .sumatera .tile-header { background: #fab1a0; }
-        .jawa .tile-header { background: #81ecec; }
-        .kalimantan .tile-header { background: #ffeaa7; }
-        .sulawesi .tile-header { background: #a29bfe; color: white; }
-        .balinusa .tile-header { background: #fd79a8; color: white; }
-        .papuamaluku .tile-header { background: #ff7675; color: white; }
-        .corner .tile-header { background: #b2bec3; height: 100%; font-size: 14px; }
-
-        /* Ownership Styles */
-        .owned-p1 { border: 3px solid var(--primary); background: #e3f2fd; }
-        .owned-cpu { border: 3px solid var(--secondary); background: #fce4ec; }
-
-        /* Effect Animations */
-        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
-        .attacked { animation: shake 0.5s; background: #555 !important; color: white; }
-
-        /* --- CONTROLS --- */
-        #center-area {
-            grid-column: 2 / 12;
-            grid-row: 2 / 11;
-            background: white;
+        label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #4a5568;
+        }
+        textarea {
+            width: 100%;
+            height: 400px;
+            padding: 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            resize: vertical;
+            box-sizing: border-box;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #3182ce;
+            box-shadow: 0 0 0 1px #3182ce;
+        }
+        .btn-group {
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
             justify-content: center;
-            padding: 20px;
-            text-align: center;
-            border: 2px dashed #ccc;
         }
-
-        h1 { margin: 0 0 10px 0; font-size: 1.8rem; color: var(--bg); }
-        
-        #scoreboard { display: flex; gap: 20px; margin-bottom: 20px; width: 100%; justify-content: center; }
-        .player-card {
-            padding: 10px 20px; border-radius: 10px; background: #f8f9fa;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 140px; position: relative;
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            color: white;
+            transition: opacity 0.2s;
         }
-        .p1-active { border: 3px solid var(--primary); transform: scale(1.05); z-index: 5; }
-        .cpu-active { border: 3px solid var(--secondary); transform: scale(1.05); z-index: 5; }
-
-        #log-box {
-            height: 100px; overflow-y: auto; width: 90%;
-            background: #2d3436; color: #dfe6e9; padding: 10px; border-radius: 5px;
-            font-size: 12px; margin-bottom: 15px; font-family: monospace; text-align: left;
-        }
-
-        .btn-main {
-            background: var(--primary); color: white; border: none;
-            padding: 15px 40px; border-radius: 30px; font-size: 16px;
-            font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
-        }
-        .btn-main:disabled { background: #ccc; box-shadow: none; }
-
-        .token {
-            width: 18px; height: 18px; border-radius: 50%;
-            border: 2px solid white; position: absolute; bottom: 5px;
-            z-index: 10; box-shadow: 0 2px 2px rgba(0,0,0,0.3);
-        }
-        .token.p1 { background: var(--primary); left: 5px; }
-        .token.cpu { background: var(--secondary); right: 5px; }
-
-        /* --- MODAL --- */
-        #modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); display: none;
-            justify-content: center; align-items: center; z-index: 1000;
-        }
-        .modal-box { background: white; padding: 25px; border-radius: 15px; text-align: center; width: 320px; animation: popUp 0.3s; }
-        @keyframes popUp { from {transform: scale(0.8);} to {transform: scale(1);} }
-        
-        .modal-info { background: #f1f2f6; padding: 10px; margin: 10px 0; border-radius: 8px; font-size: 13px; }
-        
-        .btn-group { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .btn-modal { 
-            padding: 12px; border: none; border-radius: 8px; cursor: pointer; 
-            color: white; font-weight: bold; font-size: 14px; display: flex; 
-            justify-content: space-between; align-items: center;
-        }
-        .btn-modal:hover { filter: brightness(1.1); }
-        .btn-rent { background: #95a5a6; }
-        .btn-buy { background: #2ecc71; }
-        .btn-takeover { background: var(--gold); color: #333; }
-        .btn-attack { background: #e74c3c; }
-        .btn-cancel { background: #34495e; }
-
+        button:hover { opacity: 0.9; }
+        .btn-generate { background-color: #3182ce; }
+        .btn-clear { background-color: #e53e3e; }
+        .btn-copy { background-color: #38a169; width: 100%; margin-top: 15px;}
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <div id="center-area">
-        <h1>⚔️ MONOPOLI AGRESIF</h1>
-        <div id="scoreboard">
-            <div id="card-p1" class="player-card">
-                <div>👤 KAMU</div>
-                <h3 id="p1-money">Rp 2000</h3>
+    <div class="container">
+        <h2>Report Template Generator</h2>
+        
+        <div class="grid">
+            <!-- Kolom Input (Format A) -->
+            <div class="form-group">
+                <label for="inputA">Format A (Input)</label>
+                <textarea id="inputA" placeholder="Paste data Format A di sini..."></textarea>
+                <div class="btn-group">
+                    <button class="btn-generate" onclick="generateReport()">Generate ➔</button>
+                    <button class="btn-clear" onclick="clearFields()">Clear</button>
+                </div>
             </div>
-            <div id="card-cpu" class="player-card">
-                <div>🤖 BOT</div>
-                <h3 id="cpu-money">Rp 2000</h3>
+
+            <!-- Kolom Output (Format B) -->
+            <div class="form-group">
+                <label for="outputB">Format B (Output)</label>
+                <textarea id="outputB" readonly placeholder="Hasil Format B akan muncul di sini..."></textarea>
+                <button class="btn-copy" onclick="copyOutput()">📋 Copy Hasil</button>
             </div>
         </div>
-        <div id="log-box">Selamat datang! Gunakan Take Over untuk merebut kota lawan, atau SERANG untuk menghancurkannya!</div>
-        <button id="btn-roll" class="btn-main" onclick="humanTurn()">🎲 KOCOK DADU</button>
     </div>
-</div>
 
-<div id="modal-overlay">
-    <div class="modal-box">
-        <h3 id="modal-title" style="margin:0">JUDUL</h3>
-        <div id="modal-content" class="modal-info">Info</div>
-        <div class="btn-group" id="modal-btns"></div>
-    </div>
-</div>
+    <script>
+        function generateReport() {
+            const input = document.getElementById('inputA').value;
+            const lines = input.split('\n');
 
-<script>
-    // --- DATA KOTA (38 PROVINSI + 4 SUDUT) ---
-    const boardData = [
-        { name: "START", type: "start", price: 0, region: "corner" },
-        { name: "Banda Aceh", type: "property", price: 60, rent: 10, region: "sumatera" },
-        { name: "Medan", type: "property", price: 60, rent: 10, region: "sumatera" },
-        { name: "Padang", type: "property", price: 80, rent: 15, region: "sumatera" },
-        { name: "Pekanbaru", type: "property", price: 100, rent: 20, region: "sumatera" },
-        { name: "Tj. Pinang", type: "property", price: 100, rent: 20, region: "sumatera" },
-        { name: "Jambi", type: "property", price: 120, rent: 25, region: "sumatera" },
-        { name: "Bengkulu", type: "property", price: 120, rent: 25, region: "sumatera" },
-        { name: "Palembang", type: "property", price: 140, rent: 30, region: "sumatera" },
-        { name: "Pkl. Pinang", type: "property", price: 140, rent: 30, region: "sumatera" },
-        { name: "B. Lampung", type: "property", price: 160, rent: 35, region: "sumatera" },
-        { name: "PENJARA", type: "jail", price: 0, region: "corner" },
+            // Variabel penampung data
+            let pabx = '', noIh = '', tiket = '';
+            let nama = '', cp = '', detailCase = '', lapulGaul = '', capt = '';
 
-        { name: "Serang", type: "property", price: 180, rent: 40, region: "jawa" },
-        { name: "Jakarta", type: "property", price: 350, rent: 100, region: "jawa" },
-        { name: "Bandung", type: "property", price: 200, rent: 45, region: "jawa" },
-        { name: "Semarang", type: "property", price: 200, rent: 45, region: "jawa" },
-        { name: "Yogyakarta", type: "property", price: 220, rent: 50, region: "jawa" },
-        { name: "Surabaya", type: "property", price: 240, rent: 55, region: "jawa" },
-        { name: "Denpasar", type: "property", price: 260, rent: 60, region: "balinusa" },
-        { name: "Mataram", type: "property", price: 260, rent: 60, region: "balinusa" },
-        { name: "Kupang", type: "property", price: 280, rent: 65, region: "balinusa" },
-
-        { name: "PARKIR", type: "parking", price: 0, region: "corner" },
-        { name: "Pontianak", type: "property", price: 300, rent: 70, region: "kalimantan" },
-        { name: "Palangkaraya", type: "property", price: 300, rent: 70, region: "kalimantan" },
-        { name: "Banjarmasin", type: "property", price: 320, rent: 75, region: "kalimantan" },
-        { name: "Samarinda", type: "property", price: 350, rent: 80, region: "kalimantan" },
-        { name: "Tj. Selor", type: "property", price: 320, rent: 75, region: "kalimantan" },
-        { name: "Manado", type: "property", price: 300, rent: 70, region: "sulawesi" },
-        { name: "Gorontalo", type: "property", price: 300, rent: 70, region: "sulawesi" },
-        { name: "Palu", type: "property", price: 280, rent: 65, region: "sulawesi" },
-        { name: "Mamuju", type: "property", price: 280, rent: 65, region: "sulawesi" },
-        { name: "Makassar", type: "property", price: 260, rent: 60, region: "sulawesi" },
-        { name: "KESEMPATAN", type: "chance", price: 0, region: "corner" },
-
-        { name: "Kendari", type: "property", price: 260, rent: 60, region: "sulawesi" },
-        { name: "Ambon", type: "property", price: 240, rent: 55, region: "papuamaluku" },
-        { name: "Sofifi", type: "property", price: 240, rent: 55, region: "papuamaluku" },
-        { name: "Manokwari", type: "property", price: 220, rent: 50, region: "papuamaluku" },
-        { name: "Sorong", type: "property", price: 220, rent: 50, region: "papuamaluku" },
-        { name: "Jayapura", type: "property", price: 200, rent: 45, region: "papuamaluku" },
-        { name: "Wamena", type: "property", price: 180, rent: 40, region: "papuamaluku" },
-        { name: "Nabire", type: "property", price: 180, rent: 40, region: "papuamaluku" },
-        { name: "Merauke", type: "property", price: 180, rent: 40, region: "papuamaluku" }
-    ];
-
-    let p1 = { name: "Kamu", money: 2000, position: 0, id: 'p1' };
-    let cpu = { name: "Bot", money: 2000, position: 0, id: 'cpu' };
-    let isGameActive = true;
-
-    // --- SETUP BOARD ---
-    function renderBoard() {
-        const container = document.getElementById("game-container");
-        const oldTiles = document.querySelectorAll('.tile');
-        oldTiles.forEach(t => t.remove());
-
-        boardData.forEach((tile, index) => {
-            const div = document.createElement("div");
-            div.className = `tile ${tile.region}`;
-            div.id = `tile-${index}`; // ID for animation
-            if(tile.owner === 'p1') div.classList.add("owned-p1");
-            if(tile.owner === 'cpu') div.classList.add("owned-cpu");
-
-            let col, row;
-            if (index <= 11) { row = 1; col = index + 1; }
-            else if (index <= 20) { row = index - 10; col = 12; }
-            else if (index <= 32) { row = 11; col = 12 - (index - 21); }
-            else { col = 1; row = 11 - (index - 32); }
-
-            div.style.gridColumn = col;
-            div.style.gridRow = row;
-
-            let content = `<div class="tile-header">${tile.name}</div>`;
-            if (tile.type === 'property') {
-                content += `<div>Rp ${tile.price}</div>`;
-                if(tile.owner) content += `<small>${tile.owner==='p1'?'Milikmu':'Bot'}</small>`;
-            } else {
-                content += `<small>${tile.type.toUpperCase()}</small>`;
-            }
-
-            if (p1.position === index) content += `<div class="token p1"></div>`;
-            if (cpu.position === index) content += `<div class="token cpu"></div>`;
-
-            div.innerHTML = content;
-            container.appendChild(div);
-        });
-
-        document.getElementById("p1-money").innerText = `Rp ${p1.money}`;
-        document.getElementById("cpu-money").innerText = `Rp ${cpu.money}`;
-    }
-
-    function updateLog(msg) {
-        const log = document.getElementById("log-box");
-        log.innerHTML = `> ${msg}<br>` + log.innerHTML;
-    }
-
-    // --- GAME LOGIC ---
-    function movePlayer(player, steps) {
-        const oldPos = player.position;
-        player.position = (player.position + steps) % boardData.length;
-        if (player.position < oldPos && player.position !== 0) {
-            player.money += 200;
-            updateLog(`🔄 ${player.name} lewat Start (+200)`);
-        }
-        renderBoard();
-    }
-
-    function checkTile(player) {
-        if (!isGameActive) return;
-        const tile = boardData[player.position];
-        const isHuman = player.id === 'p1';
-        const opponent = isHuman ? cpu : p1;
-
-        if (tile.type === 'property') {
-            // 1. TANAH KOSONG: Beli
-            if (tile.owner === null) {
-                if (player.money >= tile.price) {
-                    if (isHuman) {
-                        showModal(`Tanah Kosong: ${tile.name}`, `Harga: <b>Rp ${tile.price}</b><br>Sewa: Rp ${tile.rent}`, 
-                        [
-                            {txt:"✅ BELI", cls:"btn-buy", cb:()=>{ buyProp(player, tile); passTurn(); }},
-                            {txt:"❌ LEWATI", cls:"btn-cancel", cb:()=>{ updateLog("Lewat..."); passTurn(); }}
-                        ]);
-                    } else {
-                        // Bot Logic: Beli jika aman
-                        if (player.money > 200) buyProp(player, tile);
-                        else updateLog("🤖 Bot tidak membeli tanah (hemat uang).");
-                        passTurn();
+            // Ekstrak Baris 1: PABX / NoIH / Case / HVC / #CXDanantara
+            if (lines.length > 0 && lines[0].includes('/')) {
+                const parts = lines[0].split('/');
+                if (parts.length >= 3) {
+                    pabx = parts[0].trim();
+                    noIh = parts[1].trim();
+                    
+                    const casePart = parts[2].trim();
+                    // Regex khusus untuk menangkap tiket dengan format 1-XXXXXXX
+                    const ticketMatch = casePart.match(/1-[a-zA-Z0-9]+/);
+                    if (ticketMatch) {
+                        tiket = ticketMatch[0];
                     }
-                } else {
-                    updateLog(`${player.name} tidak cukup uang beli tanah.`);
-                    passTurn();
                 }
-            } 
-            // 2. MILIK SENDIRI
-            else if (tile.owner === player.id) {
-                updateLog(`${player.name} mendarat di properti sendiri.`);
-                passTurn();
             }
-            // 3. MILIK LAWAN (OPSI SERANG/TAKEOVER)
-            else {
-                handleOpponentProperty(player, opponent, tile, isHuman);
-            }
-        } 
-        else if (tile.type === 'chance') {
-            const luck = Math.random() > 0.5 ? 100 : -50;
-            player.money += luck;
-            updateLog(`❓ ${player.name} ambil Kesempatan: ${luck}`);
-            passTurn();
-        }
-        else {
-            if(tile.type === 'tax') { player.money -= 50; updateLog(`${player.name} bayar pajak 50`); }
-            passTurn();
-        }
 
-        renderBoard();
-        checkWin();
-    }
-
-    // --- LOGIKA AGRESIF (Take Over & Serang) ---
-    function handleOpponentProperty(player, opponent, tile, isHuman) {
-        const rentCost = tile.rent;
-        const takeOverCost = tile.price * 2; // Mahal: 2x Harga
-        const attackCost = Math.floor(tile.price * 0.5); // Sabotase: 1/2 Harga
-
-        if (isHuman) {
-            // Opsi untuk Manusia
-            let buttons = [];
-
-            // Tombol Bayar Sewa (Wajib ada jika uang cukup/tidak cukup)
-            buttons.push({
-                txt: `💸 BAYAR SEWA (Rp ${rentCost})`, 
-                cls: "btn-rent", 
-                cb: () => { payRent(player, opponent, rentCost); passTurn(); }
+            // Loop sisa baris untuk mengambil data spesifik
+            lines.forEach(line => {
+                // Menggunakan substring & indexOf agar tidak error jika ada tanda ':' ganda pada link http
+                if (line.startsWith('Nama Pelanggan :')) {
+                    nama = line.substring(line.indexOf(':') + 1).trim();
+                } else if (line.startsWith('CP :')) {
+                    cp = line.substring(line.indexOf(':') + 1).trim();
+                } else if (line.startsWith('Detail case :')) {
+                    detailCase = line.substring(line.indexOf(':') + 1).trim();
+                } else if (line.startsWith('Lapul/Gaul :')) {
+                    lapulGaul = line.substring(line.indexOf(':') + 1).trim();
+                } else if (line.startsWith('Capt lightshoot :')) {
+                    capt = line.substring(line.indexOf(':') + 1).trim();
+                }
             });
 
-            // Tombol Take Over (Jika uang cukup)
-            if (player.money >= takeOverCost) {
-                buttons.push({
-                    txt: `💰 TAKE OVER (Rp ${takeOverCost})`, 
-                    cls: "btn-takeover", 
-                    cb: () => { doTakeOver(player, opponent, tile, takeOverCost); passTurn(); }
-                });
-            }
+            // Mapping ke Format B
+            const output = `No Tiket : ${tiket}
+No Indihome : ${noIh}
+Nama Pelanggan : ${nama}
+NIK : 
+CP : ${cp}
+Email : 
+OrderID : 
+Tgl Kejadian : 
+Case : ${detailCase}
+Capt lightshoot : ${capt}
+Loker : CC SMG 
+Solusi : 
+Pool ID : 
+Siad : 
+Pabx : ${pabx}
+Lapul : ${lapulGaul}
+Gaul : ${lapulGaul}
+Hasil cek tools terakhir : 
+Tanggal cek tools : 
+Note : 
+- No extension TL saat take over / Callback pelanggan: 
+- CP yang dihubungi TL : 
+- Analisa TL : 
+- Note : 
+#Specialcase`;
 
-            // Tombol Serang (Jika uang cukup)
-            if (player.money >= attackCost) {
-                buttons.push({
-                    txt: `🔥 SERANG KOTA (Rp ${attackCost})`, 
-                    cls: "btn-attack", 
-                    cb: () => { doAttack(player, tile, attackCost); passTurn(); }
-                });
-            }
-
-            showModal(
-                `⚠️ Wilayah Musuh: ${tile.name}`, 
-                `Milik: ${opponent.name}<br>Pilih tindakanmu!`, 
-                buttons
-            );
-
-        } else {
-            // LOGIKA BOT PINTAR
-            // 1. Prioritas Take Over jika kaya
-            if (player.money >= takeOverCost && player.money > 500) {
-                doTakeOver(player, opponent, tile, takeOverCost);
-            }
-            // 2. Serang jika sewa mahal & tidak sanggup Take Over
-            else if (player.money >= attackCost && tile.rent > 40 && player.money > 300) {
-                doAttack(player, tile, attackCost);
-            }
-            // 3. Default: Bayar Sewa
-            else {
-                payRent(player, opponent, rentCost);
-            }
-            passTurn();
+            document.getElementById('outputB').value = output;
         }
-    }
 
-    // --- ACTIONS ---
-    function buyProp(player, tile) {
-        player.money -= tile.price;
-        tile.owner = player.id;
-        updateLog(`🏠 ${player.name} membeli ${tile.name}`);
-        renderBoard();
-    }
-
-    function payRent(player, owner, amount) {
-        player.money -= amount;
-        owner.money += amount;
-        updateLog(`💸 ${player.name} bayar sewa Rp ${amount} ke ${owner.name}`);
-    }
-
-    function doTakeOver(player, owner, tile, cost) {
-        player.money -= cost;
-        owner.money += cost; // Uang Take Over masuk ke pemilik lama
-        tile.owner = player.id; // Ganti kepemilikan
-        updateLog(`💰 ${player.name} melakukan TAKE OVER ${tile.name}!`);
-        renderBoard();
-    }
-
-    function doAttack(player, tile, cost) {
-        player.money -= cost; // Uang masuk bank (hangus)
-        tile.owner = null; // Kota jadi netral
-        
-        // Efek visual
-        const el = document.getElementById(`tile-${boardData.indexOf(tile)}`);
-        if(el) el.classList.add("attacked");
-        setTimeout(() => el.classList.remove("attacked"), 1000);
-
-        updateLog(`🔥 ${player.name} MENYERANG ${tile.name}! Kota hancur & jadi netral.`);
-        renderBoard();
-    }
-
-    function checkWin() {
-        if (p1.money < 0) endGame("Kamu Bangkrut! Bot Menguasai Indonesia.");
-        if (cpu.money < 0) endGame("Bot Bangkrut! Kamu Penguasa Nusantara!");
-    }
-
-    function endGame(msg) {
-        isGameActive = false;
-        showModal("GAME OVER", msg, [{txt:"MAIN LAGI", cls:"btn-buy", cb:()=>location.reload()}]);
-    }
-
-    // --- TURN SYSTEM ---
-    function humanTurn() {
-        if (!isGameActive) return;
-        document.getElementById("btn-roll").disabled = true;
-        document.getElementById("card-p1").classList.add("p1-active");
-        document.getElementById("card-cpu").classList.remove("cpu-active");
-
-        let dice = Math.floor(Math.random() * 6) + 1;
-        updateLog(`🎲 Kamu dapat angka ${dice}`);
-        movePlayer(p1, dice);
-        
-        setTimeout(() => checkTile(p1), 600);
-    }
-
-    function passTurn() {
-        if (!isGameActive) return;
-        document.getElementById("card-p1").classList.remove("p1-active");
-        document.getElementById("card-cpu").classList.add("cpu-active");
-        
-        // Bot delay logic handled inside turn flow via 'passTurn' call at end of action
-        // But here we need to switch to Bot execution
-        if (document.getElementById("btn-roll").disabled === true) {
-            // Check if it was human turn just ending
-             setTimeout(() => {
-                if(isGameActive) cpuTurn();
-            }, 1500);
+        function clearFields() {
+            document.getElementById('inputA').value = '';
+            document.getElementById('outputB').value = '';
+            document.getElementById('inputA').focus();
         }
-    }
 
-    function cpuTurn() {
-        updateLog("🤖 Giliran Bot...");
-        let dice = Math.floor(Math.random() * 6) + 1;
-        updateLog(`🤖 Bot dapat angka ${dice}`);
-        movePlayer(cpu, dice);
-        
-        setTimeout(() => checkTile(cpu), 600); // CheckTile will call passTurn -> unlock human
-    }
-
-    // Override passTurn for Bot to Human switch
-    const originalPassTurn = passTurn;
-    passTurn = function() {
-        if (!isGameActive) return;
-        
-        // Cek giliran siapa sebelumnya
-        const isHumanTurn = document.getElementById("card-p1").classList.contains("p1-active");
-
-        if (isHumanTurn) {
-            // Human selesai -> Oper ke Bot
-            document.getElementById("card-p1").classList.remove("p1-active");
-            document.getElementById("card-cpu").classList.add("cpu-active");
-            setTimeout(cpuTurn, 1500);
-        } else {
-            // Bot selesai -> Oper ke Human
-            document.getElementById("card-cpu").classList.remove("cpu-active");
-            document.getElementById("card-p1").classList.add("p1-active");
-            document.getElementById("btn-roll").disabled = false;
-            updateLog("👉 Giliranmu!");
+        function copyOutput() {
+            const outputText = document.getElementById('outputB');
+            if (!outputText.value) {
+                alert("Tidak ada data untuk disalin!");
+                return;
+            }
+            outputText.select();
+            outputText.setSelectionRange(0, 99999); // Untuk perangkat mobile
+            
+            navigator.clipboard.writeText(outputText.value).then(() => {
+                const btnCopy = document.querySelector('.btn-copy');
+                const originalText = btnCopy.innerHTML;
+                btnCopy.innerHTML = "✅ Berhasil Disalin!";
+                setTimeout(() => {
+                    btnCopy.innerHTML = originalText;
+                }, 2000);
+            }).catch(err => {
+                alert("Gagal menyalin teks.");
+            });
         }
-    }
-
-    // --- MODAL SYSTEM ---
-    function showModal(title, msg, buttons) {
-        document.getElementById("modal-title").innerText = title;
-        document.getElementById("modal-content").innerHTML = msg;
-        const btnGroup = document.getElementById("modal-btns");
-        btnGroup.innerHTML = '';
-        
-        buttons.forEach(btn => {
-            const b = document.createElement("button");
-            b.className = `btn-modal ${btn.cls}`;
-            b.innerHTML = `<span>${btn.txt}</span>`;
-            b.onclick = () => {
-                document.getElementById("modal-overlay").style.display = "none";
-                btn.cb();
-            };
-            btnGroup.appendChild(b);
-        });
-        document.getElementById("modal-overlay").style.display = "flex";
-    }
-
-    // Start
-    renderBoard();
-</script>
+    </script>
 </body>
 </html>
