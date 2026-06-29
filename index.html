@@ -254,6 +254,10 @@
                     nama = line.substring(line.indexOf(':') + 1).trim();
                 } else if (line.startsWith('CP :')) {
                     cp = line.substring(line.indexOf(':') + 1).trim();
+                } else if (line.startsWith('Email :')) {
+                    email = line.substring(line.indexOf(':') + 1).trim();
+                } else if (line.startsWith('Order ID permintaan :')) {
+                    orderID = line.substring(line.indexOf(':') + 1).trim();
                 } else if (line.startsWith('Detail case :')) {
                     detailCase = line.substring(line.indexOf(':') + 1).trim();
                 } else if (line.startsWith('Lapul/Gaul :')) {
@@ -268,8 +272,8 @@ No Indihome : ${noIh}
 Nama Pelanggan : ${nama}
 NIK : 
 CP : ${cp}
-Email : 
-OrderID : 
+Email : ${email}
+OrderID : ${orderID}
 Tgl Kejadian : 
 Case : ${detailCase}
 Capt lightshoot : ${capt}
